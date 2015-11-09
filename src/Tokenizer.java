@@ -44,8 +44,8 @@ public class Tokenizer {
 					break;
 				case '\t':
 				case ' ':
-				case '\n':
 				case '.': //TODO: Implement the dot's function.
+				case '\n':
 					if(temp.length() != 0){ //to handle multiple whitespaces
 						tokens.add(new Token(temp.toString(), linenumber)); // add to token list
 						temp = new StringBuilder(); // empty the stringbuilder
