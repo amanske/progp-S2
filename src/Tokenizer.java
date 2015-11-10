@@ -10,7 +10,7 @@ public class Tokenizer {
 	List<String> knownCommands = Arrays.asList(commands);
 	
 	//OBS!!! For testing purposes
-	StringBuilder sb = new StringBuilder("UP\nFORW\n#123456.\n&C(*N&(*#NRC");
+	StringBuilder sb = new StringBuilder("%UP\nFORW 1.\n COLOR #123456.");
 	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
 
@@ -54,11 +54,10 @@ public class Tokenizer {
 				default:
 					temp.append(c);
 				}
-
-				if (c == '\n') { //reached new line
-					isComment = false;
-					linenumber++;
-				}
+			}
+			if (c == '\n') { //reached new line
+				isComment = false;
+				linenumber++;
 			}
 
 		}
