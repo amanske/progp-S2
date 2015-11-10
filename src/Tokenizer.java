@@ -10,7 +10,7 @@ public class Tokenizer {
 	List<String> knownCommands = Arrays.asList(commands);
 	
 	//OBS!!! For testing purposes
-	StringBuilder sb = new StringBuilder("DOWN.\nFORW 1. LEFT 90.\nFORW 1. LEFT 90.\nFORW 1. LEFT 90.\nFORW 1. LEFT 90. COLOR #123FEq.");
+	StringBuilder sb = new StringBuilder("UP\nFORW\n#123456.\n&C(*N&(*#NRC");
 	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
 
@@ -78,11 +78,12 @@ public class Tokenizer {
 				commands.add(new Command(value, linenumber));
 				break;
 			case "color":
-				String colorcode = listIterator.next().getValue();
+				Token color = listIterator.next();
+				String colorcode = color.getValue();
 				if(colorcode.matches("^#[A-Za-z0-9]{6}$")){ //Example: #123AbC
 					commands.add(new Command(value, colorcode, linenumber));
 				}else{
-					printError(linenumber);
+					printError(color.getLineNumber()); //Failed on color line
 				}
 				break;
 			case "rep":
@@ -90,14 +91,15 @@ public class Tokenizer {
 				break;
 			default:
 				if(knownCommands.contains(value)){
+					Token parameter = listIterator.next();
 					try{
-						commands.add(new Command(value, Integer.parseInt(listIterator.next().getValue()), linenumber));
+						commands.add(new Command(value, Integer.parseInt(parameter.getValue()), linenumber));
 					}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
-						printError(linenumber); 
+						printError(parameter.getLineNumber()); //Fails on parameter line 
 					}
 				}
 				else{
-					printError(linenumber);
+					printError(linenumber); //Fails on command line
 				}
 			}
 			
@@ -105,7 +107,7 @@ public class Tokenizer {
 		for(Command c : commands){ //for testing
 			c.print();
 		}
-		return commands; //use this list to go through commands and execute them
+		return commands; //use this list later to go through commands and execute them
 	}
 	
 	private void printError(int line){
