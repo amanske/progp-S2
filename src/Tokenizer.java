@@ -12,7 +12,7 @@ public class Tokenizer {
 	
 	//OBS!!! For testing purposes
 	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% så anses felet ligga på sista raden");
-	StringBuilder sb= new StringBuilder("Rep 5 \"Rep 5 \"Down. Down\"\"");
+	StringBuilder sb= new StringBuilder("up. down. %color bababa\n forw 1.	down.");
 	
 	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
@@ -117,6 +117,64 @@ public class Tokenizer {
 		createCommands(tokens); //Call with list of tokens to achieve list of executable commands.
 	}
 	
+	private void upDown(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
+		try{
+			Token dot = li.next();
+			if(dot.getValue().equals(".")){
+				commands.add(new Command(value, line));
+			}else{
+				printError(dot.getLineNumber()); //TODO: Get right linenumber
+			}
+		}catch(Exception e){
+			printError(line); //TODO: Correct linenumber
+		}
+	}
+	
+	private void color(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
+		try{
+			Token color = li.next();
+			Token colordot = li.next();
+			String colorcode = color.getValue();
+			if(colordot.getValue().equals(".")){
+				if(colorcode.matches("^#[A-Fa-f0-9]{6}$")){ //Example: #123AbC
+					commands.add(new Command(value, colorcode, line));
+				}else{
+					printError(color.getLineNumber()); //Failed on color line
+				}
+			}else{
+				printError(colordot.getLineNumber()); //TODO: Get right linenumber
+			}
+		}catch(NoSuchElementException e){
+			printError(line); //TODO: Correct linenumber
+		}
+	}
+	
+	private void leftRightForwBack(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
+		if(knownCommands.contains(value)){
+			try{
+				Token parameter = li.next();
+				Token defaultdot = li.next();
+				if(defaultdot.getValue().equals(".")){
+					try{
+						commands.add(new Command(value, Integer.parseInt(parameter.getValue()), line));
+					}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
+						printError(parameter.getLineNumber()); //Fails on parameter line 
+					}
+				}else{
+					printError(defaultdot.getLineNumber()); //TODO: Get right linenumber
+				}
+			}catch(NoSuchElementException e){
+				printError(line); //TODO: Correct linenumber
+			}
+		}else{
+			printError(line); //Fails on command line
+		}
+	}
+	
+	private void rep(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
+		
+	}
+	
 	public LinkedList<Command> createCommands(LinkedList<Token> tokens){
 		LinkedList<Command> commands = new LinkedList<Command>();
 		ListIterator<Token> listIterator = tokens.listIterator();
@@ -127,34 +185,10 @@ public class Tokenizer {
 			switch (value){
 			case "down":
 			case "up":
-				try{
-					Token dot = listIterator.next();
-					if(dot.getValue().equals(".")){
-						commands.add(new Command(value, linenumber));
-					}else{
-						printError(dot.getLineNumber()); //TODO: Get right linenumber
-					}
-				}catch(Exception e){
-					printError(linenumber); //TODO: Correct linenumber
-				}
+				upDown(listIterator, commands, t, value, linenumber);
 				break;
 			case "color":
-				try{
-					Token color = listIterator.next();
-					Token colordot = listIterator.next();
-					String colorcode = color.getValue();
-					if(colordot.getValue().equals(".")){
-						if(colorcode.matches("^#[A-Za-z0-9]{6}$")){ //Example: #123AbC
-							commands.add(new Command(value, colorcode, linenumber));
-						}else{
-							printError(color.getLineNumber()); //Failed on color line
-						}
-					}else{
-						printError(colordot.getLineNumber()); //TODO: Get right linenumber
-					}
-				}catch(NoSuchElementException e){
-					printError(linenumber); //TODO: Correct linenumber
-				}
+				color(listIterator, commands, t, value, linenumber);
 				break;
 			case "rep":
 				//TODO: Add code for case rep
@@ -167,28 +201,11 @@ public class Tokenizer {
 				}
 				break;
 			default:
-				if(knownCommands.contains(value)){
-					try{
-						Token parameter = listIterator.next();
-						Token defaultdot = listIterator.next();
-						if(defaultdot.getValue().equals(".")){
-							try{
-								commands.add(new Command(value, Integer.parseInt(parameter.getValue()), linenumber));
-							}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
-								printError(parameter.getLineNumber()); //Fails on parameter line 
-							}
-						}else{
-							printError(defaultdot.getLineNumber()); //TODO: Get right linenumber
-						}
-					}catch(NoSuchElementException e){
-						printError(linenumber); //TODO: Correct linenumber
-					}
-				}else{
-					printError(linenumber); //Fails on command line
-				}
-			}
+				leftRightForwBack(listIterator, commands, t, value, linenumber);
 			
+			}
 		}
+		
 		for(Command c : commands){ //for testing
 			c.print();
 		}
