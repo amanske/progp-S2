@@ -11,7 +11,9 @@ public class Tokenizer {
 	List<String> knownCommands = Arrays.asList(commands);
 	
 	//OBS!!! For testing purposes
-	StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% så anses felet ligga på sista raden");
+	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% sÃ¥ anses felet ligga pÃ¥ sista raden");
+	StringBuilder sb= new StringBuilder("Rep 5 \"Rep 5 \"Down. Down\"\"");
+	
 	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
 
@@ -30,13 +32,20 @@ public class Tokenizer {
 	}
 
 	public void parseTokens() {
+		//If repetition argument is started
+		boolean repinit = false;
+		//Number of nested citation characters
+		int citedepth = 0;
+		int index = 0; 
+
 		boolean isComment = false;
 		int linenumber = 1;
 		StringBuilder temp = new StringBuilder();
 		char[] inputChars = sb.toString().toCharArray();
+		int charlength = inputChars.length;
 		for (char c : inputChars) {
 			c = Character.toLowerCase(c); // case insensitive
-			if (!isComment) {
+			if (!isComment && !repinit) {
 				switch (c) {
 				case '%':
 					isComment = true;
@@ -58,8 +67,33 @@ public class Tokenizer {
 					tokens.add(new Token(".", linenumber)); //add dot as token
 					temp = new StringBuilder(); //And flush the stringbuilder
 					break;
+				case '"': //Starts a repetition token
+					repinit = true;
+					citedepth = 1;
+					temp.append(c);
+					break;
 				default:
 					temp.append(c);
+				}
+			}else if(repinit){
+				switch(c){
+				case '"': //Checks if end of token or beginning of nested rep
+					if(index < charlength-1){
+						char nextcharindex = inputChars[index + 1]; 
+						if(nextcharindex == '"' || nextcharindex == ' ' || nextcharindex == '\n'){
+							citedepth -= 1;
+						}else{
+							citedepth += 1;
+						}
+					}
+					temp.append(c);
+					break;
+				default:
+					temp.append(c);
+				}
+				if(citedepth == 0){
+					repinit = false; 
+					//token will be added next iteration
 				}
 			}
 			
@@ -68,6 +102,7 @@ public class Tokenizer {
 				linenumber++;
 			}
 
+			index++;
 		}
 		//OBS!! If there is anything left in the stringbuilder, it means that it will have an error
 		//Since it does not end with a dot. This error is handled later in createCommands.
@@ -76,6 +111,9 @@ public class Tokenizer {
 			temp = new StringBuilder(); 
 		}
 		
+   // 	for(Token token: tokens){
+   // 		token.myprint();
+   // 	}
 		createCommands(tokens); //Call with list of tokens to achieve list of executable commands.
 	}
 	
@@ -120,6 +158,13 @@ public class Tokenizer {
 				break;
 			case "rep":
 				//TODO: Add code for case rep
+				try{
+					Token parameter = listIterator.next();
+					Token sequence = listIterator.next();
+					
+				}catch(NoSuchElementException e){
+					printError(linenumber);
+				}
 				break;
 			default:
 				if(knownCommands.contains(value)){
@@ -151,7 +196,7 @@ public class Tokenizer {
 	}
 	
 	private void printError(int line){
-		System.out.println("Syntaxfel på rad " + line);
+		System.out.println("Syntaxfel pÃ¥ rad " + line);
 		System.exit(1); //We dont want to continue if we get and error.
 	}
 	

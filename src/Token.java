@@ -15,4 +15,10 @@ public class Token {
 		return lineNumber;
 	}
 
+	/*
+	 * for debugging purposes
+	 */
+	public void myprint(){
+		System.out.println(value + " - " + lineNumber);
+	}
 }
