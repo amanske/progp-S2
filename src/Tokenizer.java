@@ -12,7 +12,7 @@ public class Tokenizer {
 	
 	//OBS!!! For testing purposes
 	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% så anses felet ligga på sista raden");
-	StringBuilder sb= new StringBuilder("up. down. %color bababa\n forw 1.	down.");
+	StringBuilder sb= new StringBuilder("rep 2 rep 3 down.");
 	
 	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
@@ -111,38 +111,24 @@ public class Tokenizer {
 			temp = new StringBuilder(); 
 		}
 		
-   // 	for(Token token: tokens){
-   // 		token.myprint();
-   // 	}
+//    	for(Token token: tokens){
+//    		token.myprint();
+//    	}
 		createCommands(tokens); //Call with list of tokens to achieve list of executable commands.
 	}
 	
 	private void upDown(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
-		try{
-			Token dot = li.next();
-			if(dot.getValue().equals(".")){
-				commands.add(new Command(value, line));
-			}else{
-				printError(dot.getLineNumber()); //TODO: Get right linenumber
-			}
-		}catch(Exception e){
-			printError(line); //TODO: Correct linenumber
-		}
+		commands.add(new Command(value, line));
 	}
 	
 	private void color(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
 		try{
 			Token color = li.next();
-			Token colordot = li.next();
 			String colorcode = color.getValue();
-			if(colordot.getValue().equals(".")){
-				if(colorcode.matches("^#[A-Fa-f0-9]{6}$")){ //Example: #123AbC
-					commands.add(new Command(value, colorcode, line));
-				}else{
-					printError(color.getLineNumber()); //Failed on color line
-				}
+			if(colorcode.matches("^#[A-Fa-f0-9]{6}$")){ //Example: #123AbC
+				commands.add(new Command(value, colorcode, line));
 			}else{
-				printError(colordot.getLineNumber()); //TODO: Get right linenumber
+				printError(color.getLineNumber()); //Failed on color line
 			}
 		}catch(NoSuchElementException e){
 			printError(line); //TODO: Correct linenumber
@@ -153,15 +139,10 @@ public class Tokenizer {
 		if(knownCommands.contains(value)){
 			try{
 				Token parameter = li.next();
-				Token defaultdot = li.next();
-				if(defaultdot.getValue().equals(".")){
-					try{
-						commands.add(new Command(value, Integer.parseInt(parameter.getValue()), line));
-					}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
-						printError(parameter.getLineNumber()); //Fails on parameter line 
-					}
-				}else{
-					printError(defaultdot.getLineNumber()); //TODO: Get right linenumber
+				try{
+					commands.add(new Command(value, Integer.parseInt(parameter.getValue()), line));
+				}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
+					printError(parameter.getLineNumber()); //Fails on parameter line 
 				}
 			}catch(NoSuchElementException e){
 				printError(line); //TODO: Correct linenumber
@@ -171,8 +152,49 @@ public class Tokenizer {
 		}
 	}
 	
-	private void rep(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
+	private void rep(ListIterator<Token> li, LinkedList<Command> commands, int line){
+		try{
+			Token parameter = li.next();
+			Token sequence = li.next();
+			int numberOfReps = 0;
+			
+			try{
+				numberOfReps = Integer.parseInt(parameter.getValue());
+			}catch(NumberFormatException e){
+				printError(parameter.getLineNumber());
+			}
+			for(int i = 0; i < numberOfReps; i++){
+				
+				checkTokens(li, commands, sequence, sequence.getValue(), sequence.getLineNumber());
+				
+			}
+			
+		}catch(NoSuchElementException e){
+			printError(line);
+		}
+	}
+	
+	/**
+	 * Reads the tokens and adds the proper commands to the commands-list.
+	 * @param li The list iterator of the tokens
+	 * @param commands The list with the commands.
+	 */
+	private void checkTokens(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int linenumber){
+		switch (value){
+		case "down":
+		case "up":
+			upDown(li, commands, t, value, linenumber);
+			break;
+		case "color":
+			color(li, commands, t, value, linenumber);
+			break;
+		case "rep":
+			rep(li, commands, linenumber);
+			break;
+		default:
+			leftRightForwBack(li, commands, t, value, linenumber);
 		
+		}
 	}
 	
 	public LinkedList<Command> createCommands(LinkedList<Token> tokens){
@@ -182,27 +204,15 @@ public class Tokenizer {
 			Token t = listIterator.next(); //First token
 			String value = t.getValue(); // Gets value of token
 			int linenumber = t.getLineNumber(); //Get the tokens linenumber
-			switch (value){
-			case "down":
-			case "up":
-				upDown(listIterator, commands, t, value, linenumber);
-				break;
-			case "color":
-				color(listIterator, commands, t, value, linenumber);
-				break;
-			case "rep":
-				//TODO: Add code for case rep
-				try{
-					Token parameter = listIterator.next();
-					Token sequence = listIterator.next();
-					
-				}catch(NoSuchElementException e){
-					printError(linenumber);
-				}
-				break;
-			default:
-				leftRightForwBack(listIterator, commands, t, value, linenumber);
+			checkTokens(listIterator, commands, t, value, linenumber);
 			
+			try{
+				Token dot = listIterator.next();
+				if(!dot.getValue().equals(".")){
+					printError(dot.getLineNumber()); //TODO: Get right linenumber
+				}
+			}catch(NoSuchElementException e){
+				printError(linenumber); //TODO: Correct linenumber
 			}
 		}
 		
