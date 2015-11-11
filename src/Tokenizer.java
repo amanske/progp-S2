@@ -11,7 +11,7 @@ public class Tokenizer {
 	List<String> knownCommands = Arrays.asList(validcommands);
 	
 	//OBS!!! For testing purposes
-	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% så anses felet ligga på sista raden");
+	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% sÃ¥ anses felet ligga pÃ¥ sista raden");
 	StringBuilder sb = new StringBuilder();
 	
 	//StringBuilder sb = new StringBuilder();
@@ -124,12 +124,14 @@ public class Tokenizer {
 		commands.add(new Command(value, line));
 	}
 	
-	private void color(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
+	private void color(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line, int repnumber){
 		try{
 			Token color = li.next();
 			String colorcode = color.getValue();
 			if(colorcode.matches("^#[A-Fa-f0-9]{6}$")){ //Example: #123AbC
-				commands.add(new Command(value, colorcode, line));
+				for(int i = 0; i < repnumber; i++){
+					commands.add(new Command(value, colorcode, line));
+				}
 			}else{
 				printError(color.getLineNumber()); //Failed on color line
 			}
@@ -138,12 +140,14 @@ public class Tokenizer {
 		}
 	}
 	
-	private void leftRightForwBack(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
+	private void leftRightForwBack(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line, int repnumber){
 		if(knownCommands.contains(value)){
 			try{
 				Token parameter = li.next();
 				try{
-					commands.add(new Command(value, Integer.parseInt(parameter.getValue()), line));
+					for(int i = 0; i < repnumber; i++){
+						commands.add(new Command(value, Integer.parseInt(parameter.getValue()), line));
+					}
 				}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
 					printError(parameter.getLineNumber()); //Fails on parameter line 
 				}
@@ -167,12 +171,11 @@ public class Tokenizer {
 			}catch(NumberFormatException e){
 				printError(parameter.getLineNumber());
 			}
+			//DENNA IFSATS BEHÃ–VS NOG INTE MEN MÃ…STE MISSA SOM ETT DJUR
 			if(sequence.getValue().equals("rep")){
 				rep(li, commands, sequence.getLineNumber(), repnumber*numberOfReps);
 			}else{
-				for(int i = 0; i < repnumber*numberOfReps; i++){
-					checkTokens(li, commands, sequence, sequence.getValue(), sequence.getLineNumber(), repnumber);
-				}
+    				checkTokens(li, commands, sequence, sequence.getValue(), sequence.getLineNumber(), repnumber*numberOfReps);
 			}
 			
 		}catch(NoSuchElementException e){
@@ -192,14 +195,13 @@ public class Tokenizer {
 			upDown(li, commands, t, value, linenumber);
 			break;
 		case "color":
-			color(li, commands, t, value, linenumber);
+			color(li, commands, t, value, linenumber, repnumber);
 			break;
 		case "rep":
 			rep(li, commands, linenumber, repnumber);
 			break;
 		default:
-			leftRightForwBack(li, commands, t, value, linenumber);
-		
+			leftRightForwBack(li, commands, t, value, linenumber, repnumber);
 		}
 	}
 	
@@ -229,7 +231,7 @@ public class Tokenizer {
 	}
 	
 	private void printError(int line){
-		System.out.println("Syntaxfel på rad " + line);
+		System.out.println("Syntaxfel pÃ¥ rad " + line);
 		System.exit(1); //We dont want to continue if we get and error.
 	}
 	
