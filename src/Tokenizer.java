@@ -12,7 +12,7 @@ public class Tokenizer {
 	
 	//OBS!!! For testing purposes
 	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% så anses felet ligga på sista raden");
-	StringBuilder sb= new StringBuilder("rep 2 rep 3 down.");
+	StringBuilder sb= new StringBuilder("rep 3 down. rep 4 up.\nRep 2 down.");
 	
 	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
@@ -152,7 +152,8 @@ public class Tokenizer {
 		}
 	}
 	
-	private void rep(ListIterator<Token> li, LinkedList<Command> commands, int line){
+	//Repnumber is if rep is nested and will be carried to further rep calls
+	private void rep(ListIterator<Token> li, LinkedList<Command> commands, int line, int repnumber){
 		try{
 			Token parameter = li.next();
 			Token sequence = li.next();
@@ -163,10 +164,12 @@ public class Tokenizer {
 			}catch(NumberFormatException e){
 				printError(parameter.getLineNumber());
 			}
-			for(int i = 0; i < numberOfReps; i++){
-				
-				checkTokens(li, commands, sequence, sequence.getValue(), sequence.getLineNumber());
-				
+			if(sequence.getValue().equals("rep")){
+				rep(li, commands, sequence.getLineNumber(), repnumber*numberOfReps);
+			}else{
+				for(int i = 0; i < repnumber*numberOfReps; i++){
+					checkTokens(li, commands, sequence, sequence.getValue(), sequence.getLineNumber(), repnumber);
+				}
 			}
 			
 		}catch(NoSuchElementException e){
@@ -179,7 +182,7 @@ public class Tokenizer {
 	 * @param li The list iterator of the tokens
 	 * @param commands The list with the commands.
 	 */
-	private void checkTokens(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int linenumber){
+	private void checkTokens(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int linenumber, int repnumber){
 		switch (value){
 		case "down":
 		case "up":
@@ -189,7 +192,7 @@ public class Tokenizer {
 			color(li, commands, t, value, linenumber);
 			break;
 		case "rep":
-			rep(li, commands, linenumber);
+			rep(li, commands, linenumber, repnumber);
 			break;
 		default:
 			leftRightForwBack(li, commands, t, value, linenumber);
@@ -204,7 +207,7 @@ public class Tokenizer {
 			Token t = listIterator.next(); //First token
 			String value = t.getValue(); // Gets value of token
 			int linenumber = t.getLineNumber(); //Get the tokens linenumber
-			checkTokens(listIterator, commands, t, value, linenumber);
+			checkTokens(listIterator, commands, t, value, linenumber, 1);
 			
 			try{
 				Token dot = listIterator.next();
