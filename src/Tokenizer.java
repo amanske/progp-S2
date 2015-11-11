@@ -7,20 +7,21 @@ import java.util.Scanner;
 
 public class Tokenizer {
 
-	String[] commands = new String[]{ "forw", "back", "left", "right"};
-	List<String> knownCommands = Arrays.asList(commands);
+	String[] validcommands = new String[]{ "forw", "back", "left", "right"};
+	List<String> knownCommands = Arrays.asList(validcommands);
 	
 	//OBS!!! For testing purposes
-	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% sÃ¥ anses felet ligga pÃ¥ sista raden");
-	StringBuilder sb= new StringBuilder("rep 3 down. up.");
+	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% så anses felet ligga på sista raden");
+	StringBuilder sb = new StringBuilder();
 	
 	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
+	LinkedList<Command> commands = new LinkedList<Command>();
 
 	public Tokenizer() {
 	}
 
-	public void parseInput() { // starting approach
+	public LinkedList<Command> parseInput() { // starting approach
 
 		Scanner sc = new Scanner(System.in);
 		while (sc.hasNextLine()) {
@@ -29,9 +30,10 @@ public class Tokenizer {
 			parseTokens();
 		}
 		sc.close();
+		return commands;
 	}
 
-	public LinkedList<Command> parseTokens() {
+	public void parseTokens() {
 		//If repetition argument is started
 		boolean repinit = false;
 		//Number of nested citation characters
@@ -114,7 +116,8 @@ public class Tokenizer {
 //    	for(Token token: tokens){
 //    		token.myprint();
 //    	}
-		return createCommands(tokens); //Call with list of tokens to achieve list of executable commands.
+		createCommands(tokens);
+		
 	}
 	
 	private void upDown(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
@@ -200,8 +203,8 @@ public class Tokenizer {
 		}
 	}
 	
-	private LinkedList<Command> createCommands(LinkedList<Token> tokens){
-		LinkedList<Command> commands = new LinkedList<Command>();
+	private void createCommands(LinkedList<Token> tokens){
+		//LinkedList<Command> commands = new LinkedList<Command>();
 		ListIterator<Token> listIterator = tokens.listIterator();
 		while (listIterator.hasNext()) {
 			Token t = listIterator.next(); //First token
@@ -222,11 +225,11 @@ public class Tokenizer {
 		for(Command c : commands){ //for testing
 			c.print();
 		}
-		return commands; //use this list later to go through commands and execute them
+		//return commands; //use this list later to go through commands and execute them
 	}
 	
 	private void printError(int line){
-		System.out.println("Syntaxfel pÃ¥ rad " + line);
+		System.out.println("Syntaxfel på rad " + line);
 		System.exit(1); //We dont want to continue if we get and error.
 	}
 	
