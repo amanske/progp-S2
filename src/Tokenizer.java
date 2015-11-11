@@ -11,7 +11,6 @@ public class Tokenizer {
 	List<String> knownCommands = Arrays.asList(validcommands);
 	
 	//OBS!!! For testing purposes
-	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% så anses felet ligga på sista raden");
 	StringBuilder sb = new StringBuilder();
 	
 	//StringBuilder sb = new StringBuilder();
@@ -229,7 +228,7 @@ public class Tokenizer {
 	}
 	
 	private void printError(int line){
-		System.out.println("Syntaxfel på rad " + line);
+		System.out.println("Syntaxfel pÃ¥ rad " + line);
 		System.exit(1); //We dont want to continue if we get and error.
 	}
 	
