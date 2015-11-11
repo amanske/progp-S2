@@ -27,8 +27,8 @@ public class Tokenizer {
 		while (sc.hasNextLine()) {
 			sb.append(sc.nextLine());
 			sb.append("\n");
-			parseTokens();
 		}
+		parseTokens();
 		sc.close();
 		return commands;
 	}
@@ -222,9 +222,9 @@ public class Tokenizer {
 			}
 		}
 		
-		for(Command c : commands){ //for testing
-			c.print();
-		}
+//		for(Command c : commands){ //for testing
+//			c.print();
+//		}
 		//return commands; //use this list later to go through commands and execute them
 	}
 	
