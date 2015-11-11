@@ -12,7 +12,7 @@ public class Tokenizer {
 	
 	//OBS!!! For testing purposes
 	//StringBuilder sb = new StringBuilder("% Syntaxfel: saknas punkt.\nDOWN \n% Om filen tar slut mitt i ett kommando\n% så anses felet ligga på sista raden");
-	StringBuilder sb= new StringBuilder("rep 3 down. rep 4 up.\nRep 2 down.");
+	StringBuilder sb= new StringBuilder("rep 3 down. up.");
 	
 	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
@@ -31,7 +31,7 @@ public class Tokenizer {
 		sc.close();
 	}
 
-	public void parseTokens() {
+	public LinkedList<Command> parseTokens() {
 		//If repetition argument is started
 		boolean repinit = false;
 		//Number of nested citation characters
@@ -114,7 +114,7 @@ public class Tokenizer {
 //    	for(Token token: tokens){
 //    		token.myprint();
 //    	}
-		createCommands(tokens); //Call with list of tokens to achieve list of executable commands.
+		return createCommands(tokens); //Call with list of tokens to achieve list of executable commands.
 	}
 	
 	private void upDown(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
@@ -200,7 +200,7 @@ public class Tokenizer {
 		}
 	}
 	
-	public LinkedList<Command> createCommands(LinkedList<Token> tokens){
+	private LinkedList<Command> createCommands(LinkedList<Token> tokens){
 		LinkedList<Command> commands = new LinkedList<Command>();
 		ListIterator<Token> listIterator = tokens.listIterator();
 		while (listIterator.hasNext()) {
