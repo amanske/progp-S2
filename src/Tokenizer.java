@@ -121,35 +121,21 @@ public class Tokenizer {
 		commands.add(new Command(value, line));
 	}
 	
-	private void color(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line, int repnumber){
-		try{
-			Token color = li.next();
-			String colorcode = color.getValue();
-			if(colorcode.matches("^#[A-Fa-f0-9]{6}$")){ //Example: #123AbC
-				for(int i = 0; i < repnumber; i++){
-					commands.add(new Command(value, colorcode, line));
-				}
-			}else{
-				printError(color.getLineNumber()); //Failed on color line
-			}
-		}catch(NoSuchElementException e){
-			printError(line); //TODO: Correct linenumber
+	private void color(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line, Token color){
+		String colorcode = color.getValue();
+		if(colorcode.matches("^#[A-Fa-f0-9]{6}$")){ //Example: #123AbC
+			commands.add(new Command(value, colorcode, line));
+		}else{
+			printError(color.getLineNumber()); //Failed on color line
 		}
 	}
 	
-	private void leftRightForwBack(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line, int repnumber){
+	private void leftRightForwBack(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line, Token parameter){
 		if(knownCommands.contains(value)){
 			try{
-				Token parameter = li.next();
-				try{
-					for(int i = 0; i < repnumber; i++){
-						commands.add(new Command(value, Integer.parseInt(parameter.getValue()), line));
-					}
-				}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
-					printError(parameter.getLineNumber()); //Fails on parameter line 
-				}
-			}catch(NoSuchElementException e){
-				printError(line); //TODO: Correct linenumber
+				commands.add(new Command(value, Integer.parseInt(parameter.getValue()), line));
+			}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
+				printError(parameter.getLineNumber()); //Fails on parameter line 
 			}
 		}else{
 			printError(line); //Fails on command line
@@ -157,26 +143,12 @@ public class Tokenizer {
 	}
 	
 	//Repnumber is if rep is nested and will be carried to further rep calls
-	private void rep(ListIterator<Token> li, LinkedList<Command> commands, int line, int repnumber){
+	private void rep(ListIterator<Token> li, LinkedList<Command> commands, int line, int repnumber, Token parameter, Token sequence){
 		try{
-			Token parameter = li.next();
-			Token sequence = li.next();
-			int numberOfReps = 0;
-			
-			try{
-				numberOfReps = Integer.parseInt(parameter.getValue());
-			}catch(NumberFormatException e){
-				printError(parameter.getLineNumber());
-			}
-			//DENNA IFSATS BEHÖVS NOG INTE MEN MÅSTE PISSA SOM ETT DJUR
-			if(sequence.getValue().equals("rep")){
-				rep(li, commands, sequence.getLineNumber(), repnumber*numberOfReps);
-			}else{
-    				checkTokens(li, commands, sequence, sequence.getValue(), sequence.getLineNumber(), repnumber*numberOfReps);
-			}
-			
-		}catch(NoSuchElementException e){
-			printError(line);
+			int	numberOfReps = Integer.parseInt(parameter.getValue());
+			checkTokens(li, commands, sequence, sequence.getValue(), sequence.getLineNumber(), repnumber*numberOfReps);
+		}catch(NumberFormatException e){
+			printError(parameter.getLineNumber());
 		}
 	}
 	
@@ -193,13 +165,33 @@ public class Tokenizer {
 			upDown(li, commands, t, value, linenumber);
 			break;
 		case "color":
-			color(li, commands, t, value, linenumber, repnumber);
+			try{
+				Token color = li.next();
+				for(int i = 0; i < repnumber; i++){
+					color(li, commands, t, value, linenumber, color);
+				}
+			}catch(NoSuchElementException e){
+				printError(linenumber); //TODO: Correct linenumber
+			}
 			break;
 		case "rep":
-			rep(li, commands, linenumber, repnumber);
+			try{
+				Token parameter = li.next(); //the number of reps
+				Token sequence = li.next(); //if quote sequence or not
+				rep(li, commands, linenumber, repnumber, parameter, sequence);
+			}catch(NoSuchElementException e){
+				printError(linenumber);
+			}
 			break;
 		default:
-			leftRightForwBack(li, commands, t, value, linenumber, repnumber);
+			try{
+				Token parameter = li.next();
+				for(int i = 0; i < repnumber; i++){
+					leftRightForwBack(li, commands, t, value, linenumber, parameter);
+				}
+			}catch(NoSuchElementException e){
+				printError(linenumber); //TODO: Correct linenumber
+			}
 		}
 	}
 	
