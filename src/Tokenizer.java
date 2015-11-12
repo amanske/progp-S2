@@ -34,14 +34,11 @@ public class Tokenizer {
 		//If repetition argument is started
 		boolean repinit = false;
 		//Number of nested citation characters
-		int citedepth = 0;
-		int index = 0; 
 
 		boolean isComment = false;
 		int linenumber = 1;
 		StringBuilder temp = new StringBuilder();
 		char[] inputChars = sb.toString().toCharArray();
-		int charlength = inputChars.length;
 		for (char c : inputChars) {
 			c = Character.toLowerCase(c); // case insensitive
 			if (!isComment && !repinit) {
@@ -67,32 +64,10 @@ public class Tokenizer {
 					temp = new StringBuilder(); //And flush the stringbuilder
 					break;
 				case '"': //Starts a repetition token
-					repinit = true;
-					citedepth = 1;
-					temp.append(c);
+					tokens.add(new Token("\"", linenumber));
 					break;
 				default:
 					temp.append(c);
-				}
-			}else if(repinit){
-				switch(c){
-				case '"': //Checks if end of token or beginning of nested rep
-					if(index < charlength-1){
-						char nextcharindex = inputChars[index + 1]; 
-						if(nextcharindex == '"' || nextcharindex == ' ' || nextcharindex == '\n'){
-							citedepth -= 1;
-						}else{
-							citedepth += 1;
-						}
-					}
-					temp.append(c);
-					break;
-				default:
-					temp.append(c);
-				}
-				if(citedepth == 0){
-					repinit = false; 
-					//token will be added next iteration
 				}
 			}
 			
@@ -101,7 +76,7 @@ public class Tokenizer {
 				linenumber++;
 			}
 
-			index++;
+			
 		}
 		//OBS!! If there is anything left in the stringbuilder, it means that it will have an error
 		//Since it does not end with a dot. This error is handled later in createCommands.
