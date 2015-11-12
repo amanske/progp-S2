@@ -168,7 +168,7 @@ public class Tokenizer {
 			}catch(NumberFormatException e){
 				printError(parameter.getLineNumber());
 			}
-			//DENNA IFSATS BEHÖVS NOG INTE MEN MÅSTE MISSA SOM ETT DJUR
+			//DENNA IFSATS BEHÖVS NOG INTE MEN MÅSTE PISSA SOM ETT DJUR
 			if(sequence.getValue().equals("rep")){
 				rep(li, commands, sequence.getLineNumber(), repnumber*numberOfReps);
 			}else{
@@ -184,6 +184,7 @@ public class Tokenizer {
 	 * Reads the tokens and adds the proper commands to the commands-list.
 	 * @param li The list iterator of the tokens
 	 * @param commands The list with the commands.
+	 * @param repnumber Amount of times a command should be run
 	 */
 	private void checkTokens(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int linenumber, int repnumber){
 		switch (value){
