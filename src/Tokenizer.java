@@ -39,12 +39,17 @@ public class Tokenizer {
 		int linenumber = 1;
 		StringBuilder temp = new StringBuilder();
 		char[] inputChars = sb.toString().toCharArray();
+		int index = 0;
 		for (char c : inputChars) {
 			c = Character.toLowerCase(c); // case insensitive
 			if (!isComment && !repinit) {
 				switch (c) {
 				case '%':
 					isComment = true;
+					if(temp.length() != 0){ //to handle multiple whitespaces
+						tokens.add(new Token(temp.toString(), linenumber)); // add to token list
+					}
+					temp = new StringBuilder(); //And flush the stringbuilder
 					break;
 				case '\r': // windows fix
 					break;
@@ -64,11 +69,12 @@ public class Tokenizer {
 					temp = new StringBuilder(); //And flush the stringbuilder
 					break;
 				case '"': //Starts a repetition token
-					if(temp.length() != 0){ //to handle multiple whitespaces
-						tokens.add(new Token(temp.toString(), linenumber));
+					if(temp.length() == 0){ //to handle multiple whitespaces
+						temp = new StringBuilder();
+						tokens.add(new Token("\"", linenumber));
+					}else{
+						temp.append(c);
 					}
-					temp = new StringBuilder();
-					tokens.add(new Token("\"", linenumber));
 					break;
 				default:
 					temp.append(c);
@@ -80,7 +86,7 @@ public class Tokenizer {
 				linenumber++;
 			}
 
-			
+			index++;
 		}
 		//OBS!! If there is anything left in the stringbuilder, it means that it will have an error
 		//Since it does not end with a dot. This error is handled later in createCommands.
@@ -89,9 +95,9 @@ public class Tokenizer {
 			temp = new StringBuilder(); 
 		}
 		
-//    	for(Token token: tokens){
-//    		token.myprint();
-//    	}
+   // 	for(Token token: tokens){
+   // 		token.myprint();
+   // 	}
 		createCommands(tokens);
 		
 	}

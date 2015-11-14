@@ -53,8 +53,11 @@ public class Command {
 				errorline = number.getLineNumber();//new error line has been found
 				if(number.getValue().matches("^[0-9]+$")){ //is a number
 					parameter = Integer.parseInt(number.getValue());
+					if(parameter == 0){
+						syntaxError(errorline);
+					}
 				}else{
-					syntaxError(number.getLineNumber());
+					syntaxError(errorline);
 				}
 				Token dot = li.next();
 				errorline = dot.getLineNumber();//new error line has been found
@@ -90,8 +93,11 @@ public class Command {
 
 				if(number.getValue().matches("^[0-9]+$")){ //is a number
 					parameter = Integer.parseInt(number.getValue());
+					if(parameter == 0){
+						syntaxError(errorline);
+					}
 				}else{
-					syntaxError(number.getLineNumber());
+					syntaxError(errorline);
 				}
 
 				nestcommands = new LinkedList<Command>();
