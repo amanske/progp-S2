@@ -64,6 +64,10 @@ public class Tokenizer {
 					temp = new StringBuilder(); //And flush the stringbuilder
 					break;
 				case '"': //Starts a repetition token
+					if(temp.length() != 0){ //to handle multiple whitespaces
+						tokens.add(new Token(temp.toString(), linenumber));
+					}
+					temp = new StringBuilder();
 					tokens.add(new Token("\"", linenumber));
 					break;
 				default:
@@ -92,112 +96,21 @@ public class Tokenizer {
 		
 	}
 	
-	private void upDown(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line){
-		commands.add(new Command(value, line));
-	}
-	
-	private void color(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line, Token color){
-		String colorcode = color.getValue();
-		if(colorcode.matches("^#[A-Fa-f0-9]{6}$")){ //Example: #123AbC
-			commands.add(new Command(value, colorcode, line));
-		}else{
-			printError(color.getLineNumber()); //Failed on color line
-		}
-	}
-	
-	private void leftRightForwBack(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int line, Token parameter){
-		if(knownCommands.contains(value)){
-			try{
-				commands.add(new Command(value, Integer.parseInt(parameter.getValue()), line));
-			}catch(NumberFormatException e){ //parameter is not an int, parseInt fails.
-				printError(parameter.getLineNumber()); //Fails on parameter line 
-			}
-		}else{
-			printError(line); //Fails on command line
-		}
-	}
-	
-	//Repnumber is if rep is nested and will be carried to further rep calls
-	private void rep(ListIterator<Token> li, LinkedList<Command> commands, int line, int repnumber, Token parameter, Token sequence){
-		try{
-			int	numberOfReps = Integer.parseInt(parameter.getValue());
-			checkTokens(li, commands, sequence, sequence.getValue(), sequence.getLineNumber(), repnumber*numberOfReps);
-		}catch(NumberFormatException e){
-			printError(parameter.getLineNumber());
-		}
-	}
-	
-	/**
-	 * Reads the tokens and adds the proper commands to the commands-list.
-	 * @param li The list iterator of the tokens
-	 * @param commands The list with the commands.
-	 * @param repnumber Amount of times a command should be run
-	 */
-	private void checkTokens(ListIterator<Token> li, LinkedList<Command> commands, Token t, String value, int linenumber, int repnumber){
-		switch (value){
-		case "down":
-		case "up":
-			upDown(li, commands, t, value, linenumber);
-			break;
-		case "color":
-			try{
-				Token color = li.next();
-				for(int i = 0; i < repnumber; i++){
-					color(li, commands, t, value, linenumber, color);
-				}
-			}catch(NoSuchElementException e){
-				printError(linenumber); //TODO: Correct linenumber
-			}
-			break;
-		case "rep":
-			try{
-				Token parameter = li.next(); //the number of reps
-				Token sequence = li.next(); //if quote sequence or not
-				rep(li, commands, linenumber, repnumber, parameter, sequence);
-			}catch(NoSuchElementException e){
-				printError(linenumber);
-			}
-			break;
-		default:
-			try{
-				Token parameter = li.next();
-				for(int i = 0; i < repnumber; i++){
-					leftRightForwBack(li, commands, t, value, linenumber, parameter);
-				}
-			}catch(NoSuchElementException e){
-				printError(linenumber); //TODO: Correct linenumber
-			}
-		}
-	}
 	
 	private void createCommands(LinkedList<Token> tokens){
-		//LinkedList<Command> commands = new LinkedList<Command>();
-		ListIterator<Token> listIterator = tokens.listIterator();
-		while (listIterator.hasNext()) {
-			Token t = listIterator.next(); //First token
-			String value = t.getValue(); // Gets value of token
-			int linenumber = t.getLineNumber(); //Get the tokens linenumber
-			checkTokens(listIterator, commands, t, value, linenumber, 1);
-			
-			try{
-				Token dot = listIterator.next();
-				if(!dot.getValue().equals(".")){
-					printError(dot.getLineNumber()); //TODO: Get right linenumber
-				}
-			}catch(NoSuchElementException e){
-				printError(linenumber); //TODO: Correct linenumber
-			}
+		ListIterator<Token> li = tokens.listIterator();
+		while(li.hasNext()){
+			Token token = li.next();
+			commands.add(new Command(token, li));
 		}
-		
-//		for(Command c : commands){ //for testing
-//			c.print();
-//		}
-		//return commands; //use this list later to go through commands and execute them
+		for(Command command: commands){
+			command.print();
+		}
 	}
 	
 	private void printError(int line){
 		System.out.println("Syntaxfel på rad " + line);
-		System.exit(1); //We dont want to continue if we get and error.
+		System.exit(0); //We dont want to continue if we get and error.
 	}
 	
 	

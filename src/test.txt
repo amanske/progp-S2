@@ -1,8 +1,2 @@
-DOWN.
-forw 1.
-forw 1. forw 1.
-rep 2 forw 1.
-color #AAAAAA.
-right 90.
-down.
-rep 2 rep 2 rep 2 forw 1.
+
+rep 2 "rep 2 "forw 1." back 1."
