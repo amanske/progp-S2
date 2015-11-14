@@ -103,9 +103,9 @@ public class Tokenizer {
 			Token token = li.next();
 			commands.add(new Command(token, li));
 		}
-		for(Command command: commands){
-			command.print();
-		}
+//		for(Command command: commands){
+//			command.print();
+//		}
 	}
 	
 	private void printError(int line){

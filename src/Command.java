@@ -69,7 +69,7 @@ public class Command {
 			try{
 				Token color = li.next();
 				errorline = color.getLineNumber(); //new error line has been found
-				if(color.getValue().matches("^#[a-f0-9]{6}$")){ //is a number
+				if(color.getValue().matches("^#[A-Fa-f0-9]{6}$")){ //is a number
 					colorCode = color.getValue();
 				}else{
 					syntaxError(errorline);
@@ -136,6 +136,9 @@ public class Command {
 	}
 	public int getLineNumber(){
 		return lineNumber;
+	}
+	public LinkedList<Command> getNestcommands(){
+		return nestcommands;
 	}
 	public void print() {
 		if(!command.equals("rep")){

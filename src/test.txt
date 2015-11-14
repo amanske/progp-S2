@@ -1,2 +1,10 @@
-
-rep 2 "rep 2 "forw 1." back 1."
+% Ta 8 steg framåt
+REP 2 REP 4 FORW 1.
+REP% Repetition på gång
+2% Två gånger
+"%Snart kommer kommandon
+DOWN% Kommentera mera
+.% Avsluta down-kommando
+FORW 1
+LEFT 1. % Oj, glömde punkt efter FORW-kommando
+"
