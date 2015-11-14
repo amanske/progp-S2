@@ -1,5 +1,8 @@
-import java.util.LinkedList;
+/**
+ * Executes a Command list.
+ */
 
+import java.util.LinkedList;
 
 public class Executer {
 	
@@ -7,31 +10,34 @@ public class Executer {
 	Leonardo leo = new Leonardo();
 	LinkedList<Command> commands = t.parseInput();
 
-	public Executer() {
-		
-	}
+	public Executer() {}
 	
+	/**
+	 * Runs the executioner on every Command in the list
+	 */
 	public void execute(){
 		for(Command c : commands){
-			//c.getNestcommands();
 			executeCommand(c);
 		}
 	}
 	
+	/**
+	 * Executes the actual Command.
+	 * @param c The command to be executed.
+	 */
 	private void executeCommand(Command c) {
-		//System.out.println(c.getCommand());
 		switch(c.getCommand()){
 		case "forw":
 			leo.changePos(c.getParameter());
 			if(leo.isPenEnabled()){
-				leo.printInfo();
+				leo.printInfo(); //only print if pen is down
 			}
 			
 			break;
 		case "back":
 			leo.changePos(-c.getParameter()); //negative int for backing
 			if(leo.isPenEnabled()){
-				leo.printInfo();
+				leo.printInfo(); //only print if pen is down
 			}
 			
 			break;
@@ -59,8 +65,7 @@ public class Executer {
 			}
 			break;
 		default:
-			//System.out.println("error: " + c.getCommand());
-			System.out.println("Fatal error in commands list");
+			System.out.println("Fatal error in commands list"); //If we somehow get here, congratulations! :)
 		}
 		
 	}

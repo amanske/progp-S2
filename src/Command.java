@@ -1,8 +1,9 @@
-
+/**
+ * Defines a Command and its various parameters.
+ */
 import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 public class Command {
 
@@ -13,21 +14,32 @@ public class Command {
 	private LinkedList<Command> nestcommands;
 	private int errorline;
 	
+	/*
+	 * Use this constructor to create a forw, back, right or left Command.
+	 */
 	public Command(String command, int parameter, int lineNumber) {
 		this.command = command;
 		this.parameter = parameter;
 		this.lineNumber = lineNumber;
 	}
+	/*
+	 * Use this constructor to create a color Command.
+	 */
 	public Command(String command, String colorCode, int lineNumber) {
 		this.command = command;
 		this.colorCode = colorCode;
 		this.lineNumber = lineNumber;
 	}
+	/*
+	 * Use this constructor to create a up or down Command.
+	 */
 	public Command(String command, int lineNumber){
 		this.command = command;
 		this.lineNumber = lineNumber;
 	}
-
+	/*
+	 * Use this constructor to create a rep Command.
+	 */
 	public Command(Token token, ListIterator<Token> li){
 		command = token.getValue();
 		lineNumber = token.getLineNumber();
@@ -153,20 +165,6 @@ public class Command {
 	public LinkedList<Command> getNestcommands(){
 		return nestcommands;
 	}
-	public void print() {
-		if(!command.equals("rep")){
-			System.out.println(command + ", " + parameter + ", " + colorCode + ", " + lineNumber);
-		}else{
-			for(int i = 0; i < parameter; i++){
-				for(Command cmd : nestcommands){
-					cmd.print();
-				}
-			}
-		}
-		
-	}
-
-
 	private void syntaxError(int line){
 		System.out.println("Syntaxfel på rad " + line);
 		System.exit(0); //We dont want to continue if we get and error.

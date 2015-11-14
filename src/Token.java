@@ -1,4 +1,6 @@
-
+/**
+ * Defines a Token, including its value and its line number.
+ */
 public class Token {
 	private String value;
 	private int lineNumber;
@@ -13,12 +15,5 @@ public class Token {
 	}
 	public int getLineNumber(){
 		return lineNumber;
-	}
-
-	/*
-	 * for debugging purposes
-	 */
-	public void myprint(){
-		System.out.println(value + " - " + lineNumber);
 	}
 }

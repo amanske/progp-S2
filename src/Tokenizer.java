@@ -1,24 +1,27 @@
-import java.util.Arrays;
+/**
+ * This class is systematically parsing through the input and
+ * creates tokens of character pairs. A LinkedList, commands, is
+ * build so that the Executer-class can handle it.
+ */
+
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Tokenizer {
 
-	String[] validcommands = new String[]{ "forw", "back", "left", "right"};
-	List<String> knownCommands = Arrays.asList(validcommands);
 	StringBuilder sb = new StringBuilder();
-	
-	//StringBuilder sb = new StringBuilder();
 	LinkedList<Token> tokens = new LinkedList<Token>();
 	LinkedList<Command> commands = new LinkedList<Command>();
 
-	public Tokenizer() {
-	}
-
-	public LinkedList<Command> parseInput() { // starting approach
+	public Tokenizer() {}
+	
+	/**
+	 * Parses the input from System.in and calls parseTokens() to
+	 * create: 1. a list of tokens and 2. a list of commands.
+	 * @return commands The list of commands to execute.
+	 */
+	public LinkedList<Command> parseInput() { 
 
 		Scanner sc = new Scanner(System.in);
 		while (sc.hasNextLine()) {
@@ -30,19 +33,18 @@ public class Tokenizer {
 		return commands;
 	}
 
+	/**
+	 * Parses the tokens to a complete token list to be able to create commands 
+	 * using the createCommands method.
+	 */
 	public void parseTokens() {
-		//If repetition argument is started
-		boolean repinit = false;
-		//Number of nested citation characters
-
 		boolean isComment = false;
 		int linenumber = 1;
 		StringBuilder temp = new StringBuilder();
 		char[] inputChars = sb.toString().toCharArray();
-		int index = 0;
 		for (char c : inputChars) {
 			c = Character.toLowerCase(c); // case insensitive
-			if (!isComment && !repinit) {
+			if (!isComment) {
 				switch (c) {
 				case '%':
 					isComment = true;
@@ -79,45 +81,31 @@ public class Tokenizer {
 				default:
 					temp.append(c);
 				}
-			}
-			
+			}	
 			if (c == '\n') { //reached new line
 				isComment = false;
 				linenumber++;
 			}
-
-			index++;
 		}
 		//OBS!! If there is anything left in the stringbuilder, it means that it will have an error
-		//Since it does not end with a dot. This error is handled later in createCommands.
+		//Since it does not end with a dot. This error is handled later in Commands.
 		if(temp.length() != 0){
 			tokens.add(new Token(temp.toString(), linenumber)); 
 			temp = new StringBuilder(); 
 		}
-		
-   // 	for(Token token: tokens){
-   // 		token.myprint();
-   // 	}
+		//create executionable Commands
 		createCommands(tokens);
 		
 	}
-	
-	
+	/**
+	 * Creates a list of commands to be executed by the Executer.
+	 * @param tokens The tokens to create commands out of.
+	 */
 	private void createCommands(LinkedList<Token> tokens){
 		ListIterator<Token> li = tokens.listIterator();
 		while(li.hasNext()){
 			Token token = li.next();
 			commands.add(new Command(token, li));
 		}
-//		for(Command command: commands){
-//			command.print();
-//		}
-	}
-	
-	private void printError(int line){
-		System.out.println("Syntaxfel på rad " + line);
-		System.exit(0); //We dont want to continue if we get and error.
-	}
-	
-	
+	}	
 }
