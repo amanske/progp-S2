@@ -11,6 +11,7 @@ public class Command {
 	private String colorCode;
 	private int lineNumber;
 	private LinkedList<Command> nestcommands;
+	private int errorline;
 	
 	public Command(String command, int parameter, int lineNumber) {
 		this.command = command;
@@ -30,14 +31,15 @@ public class Command {
 	public Command(Token token, ListIterator<Token> li){
 		command = token.getValue();
 		lineNumber = token.getLineNumber();
-		int errorline = lineNumber;
+		errorline = lineNumber;
 		switch(command){
 		case "up":
 		case "down":
 			try{
 				Token dot = li.next();
+				errorline = dot.getLineNumber();
 				if(!dot.getValue().equals(".")){
-					syntaxError(dot.getLineNumber());
+					syntaxError(errorline);
 				}
 
 			}catch(NoSuchElementException e){
@@ -116,6 +118,7 @@ public class Command {
 							finished = true; //hit end of quote
 						}else{
 							nestcommands.add(new Command(next, li));
+							errorline = nestcommands.getLast().getErrorLine();
 						}
 					}
 				}else{
@@ -129,6 +132,10 @@ public class Command {
 			syntaxError(errorline);
 		}
 
+	}
+
+	public int getErrorLine(){
+		return errorline;
 	}
 
 	public String getCommand(){
