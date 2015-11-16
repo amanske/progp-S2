@@ -15,30 +15,7 @@ public class Command {
 	private int errorline;
 	
 	/*
-	 * Use this constructor to create a forw, back, right or left Command.
-	 */
-	public Command(String command, int parameter, int lineNumber) {
-		this.command = command;
-		this.parameter = parameter;
-		this.lineNumber = lineNumber;
-	}
-	/*
-	 * Use this constructor to create a color Command.
-	 */
-	public Command(String command, String colorCode, int lineNumber) {
-		this.command = command;
-		this.colorCode = colorCode;
-		this.lineNumber = lineNumber;
-	}
-	/*
-	 * Use this constructor to create a up or down Command.
-	 */
-	public Command(String command, int lineNumber){
-		this.command = command;
-		this.lineNumber = lineNumber;
-	}
-	/*
-	 * Use this constructor to create a rep Command.
+	 * Create a new command
 	 */
 	public Command(Token token, ListIterator<Token> li){
 		command = token.getValue();
